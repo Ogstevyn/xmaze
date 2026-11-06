@@ -4,7 +4,7 @@
 // is an extra mode that races the same board.
 
 import { generate } from "./puzzle.js";
-import { draw } from "./render.js";
+import { draw, drawFlying } from "./render.js";
 import { InputController } from "./input.js";
 import * as audio from "./audio.js";
 import { currentTheme, cycleTheme, applyCssVars } from "./theme.js";
@@ -35,16 +35,47 @@ const S = {
   startedAt: 0,
   input: null,
   flash: new Map(),
+  flying: [],
+  animating: false,
   mp: false,
   room: null,
   roster: [],
 };
 
+const FLY_MS = 260;
+
 // --- rendering ------------------------------------------------------------
 
 function redraw() {
   if (!S.board) return;
-  draw($("board").getContext("2d"), S.board, S.input.view, currentTheme(), S.flash);
+  const ctx = $("board").getContext("2d");
+  draw(ctx, S.board, S.input.view, currentTheme(), S.flash);
+  for (const f of S.flying) drawFlying(ctx, S.board, S.input.view, currentTheme(), f);
+}
+
+// Animate arrows flying off the board. Runs only while there are flyers.
+function startAnim() {
+  if (S.animating) return;
+  S.animating = true;
+  const step = () => {
+    const now = performance.now();
+    S.flying = S.flying.filter((f) => {
+      f.progress = (now - f.t0) / FLY_MS;
+      return f.progress < 1;
+    });
+    redraw();
+    if (S.flying.length) {
+      requestAnimationFrame(step);
+    } else {
+      S.animating = false;
+    }
+  };
+  requestAnimationFrame(step);
+}
+
+function launch(x, y, dir) {
+  S.flying.push({ x, y, dir, t0: performance.now(), progress: 0 });
+  startAnim();
 }
 
 function ensureInput() {
@@ -111,6 +142,7 @@ function startLevel(n) {
   S.mistakes = 0;
   S.hintsUsed = 0;
   S.flash.clear();
+  S.flying = [];
   S.startedAt = performance.now();
   $("g-level").textContent = `Level ${n}`;
   $("g-diff").textContent = S.cfg.difficulty;
@@ -138,12 +170,16 @@ function renderDrops() {
 
 function onTap(x, y) {
   if (!S.board) return;
+  const dir = S.board.arrowAt(x, y); // capture before removal for the animation
   const result = S.board.tap(x, y);
   if (result === "left") {
+    audio.sfxLeave();
+    launch(x, y, dir);
     if (S.mp) S.room?.progress(S.total - S.board.remaining);
-    if (S.board.solved) onWin();
+    if (S.board.solved) setTimeout(onWin, FLY_MS);
   } else if (result === "blocked") {
     S.mistakes++;
+    audio.sfxBlocked();
     flashCell(x, y, currentTheme().exit);
   }
 }
@@ -154,11 +190,12 @@ function useHint() {
   if (!cell) return;
   S.hintsUsed++;
   renderDrops();
-  flashCell(cell[0], cell[1], currentTheme().start);
+  const dir = S.board.arrowAt(cell[0], cell[1]);
   S.board.tap(cell[0], cell[1]);
+  audio.sfxLeave();
+  launch(cell[0], cell[1], dir);
   if (S.mp) S.room?.progress(S.total - S.board.remaining);
-  redraw();
-  if (S.board.solved) onWin();
+  if (S.board.solved) setTimeout(onWin, FLY_MS);
 }
 
 async function onWin() {
@@ -182,6 +219,8 @@ async function onWin() {
 }
 
 function showWin(result, todays) {
+  audio.sfxWin();
+  burstConfetti();
   $("stars").textContent = "⭐".repeat(result.stars) + "☆".repeat(3 - result.stars);
   $("win-title").textContent = result.flawless ? "Flawless!" : "Level Complete";
   $("w-diff").textContent = S.cfg.difficulty;
@@ -199,6 +238,23 @@ function fadeZoomHint() {
   const el = $("zoom-hint");
   el.style.opacity = "1";
   setTimeout(() => (el.style.opacity = "0"), 2500);
+}
+
+// Lightweight confetti burst on win — a handful of falling coloured chips.
+function burstConfetti() {
+  const colours = ["#e8962c", "#5aaa78", "#d25c48", "#c8803c", "#7fa58a"];
+  const layer = document.createElement("div");
+  layer.className = "confetti";
+  for (let i = 0; i < 36; i++) {
+    const c = document.createElement("i");
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = colours[i % colours.length];
+    c.style.animationDelay = Math.random() * 0.3 + "s";
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    layer.appendChild(c);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 2600);
 }
 
 // --- multiplayer ----------------------------------------------------------
@@ -268,6 +324,7 @@ function startMpRace(seed) {
   S.mistakes = 0;
   S.hintsUsed = 0;
   S.flash.clear();
+  S.flying = [];
   S.startedAt = performance.now();
   $("g-level").textContent = "Race";
   $("g-diff").textContent = "Multiplayer";

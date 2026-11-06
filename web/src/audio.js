@@ -54,3 +54,33 @@ export function toggleMute() {
   if (gain) gain.gain.value = muted ? 0 : 0.18;
   return muted;
 }
+
+// --- sound effects -------------------------------------------------------
+
+// A short blip. `up` rises in pitch (satisfying "whoosh out"); otherwise a low
+// thud for a blocked tap.
+function blip(freq, dur, type, vol, slideTo) {
+  if (!ctx || muted) return;
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, now);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+  env.gain.setValueAtTime(vol, now);
+  env.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  osc.connect(env);
+  env.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + dur);
+}
+
+export function sfxLeave() {
+  blip(420, 0.16, "triangle", 0.25, 900); // rising whoosh as the arrow flies off
+}
+export function sfxBlocked() {
+  blip(150, 0.12, "sawtooth", 0.2, 90); // low thud
+}
+export function sfxWin() {
+  [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => blip(f, 0.22, "triangle", 0.22), i * 90));
+}

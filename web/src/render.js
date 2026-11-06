@@ -88,3 +88,25 @@ export function draw(ctx, board, view, theme, flash) {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
+
+// Draw an arrow flying off the board: slid along its direction by `progress`
+// (0..1) and fading out. Call after draw(), reusing the same view transform.
+export function drawFlying(ctx, board, view, theme, fly) {
+  ctx.setTransform(view.scale, 0, 0, view.scale, view.ox, view.oy);
+  ctx.lineCap = "round";
+  const span = Math.max(board.width, board.height) * CELL;
+  const slide = fly.progress * span * 1.1;
+  const half = CELL * 0.5;
+  const mx = cx(fly.x) + fly.dir.dx * slide;
+  const my = cy(fly.y) + fly.dir.dy * slide;
+  ctx.globalAlpha = Math.max(0, 1 - fly.progress);
+  ctx.strokeStyle = theme.start; // freed arrows read green as they leave
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(mx - fly.dir.dx * half, my - fly.dir.dy * half);
+  ctx.lineTo(mx + fly.dir.dx * half, my + fly.dir.dy * half);
+  ctx.stroke();
+  arrowHead(ctx, mx, my, mx + fly.dir.dx * half, my + fly.dir.dy * half, 9, theme.start);
+  ctx.globalAlpha = 1;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
