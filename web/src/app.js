@@ -17,9 +17,11 @@ import { saveScore, topScores } from "./leaderboard.js";
 
 const MP_BOARD = { width: 11, height: 7, fill: 0.68 };
 const HINT_MAX = 3;
+const LIVES_MAX = 3;
 const FLASH_MS = 320;
 
 const $ = (id) => document.getElementById(id);
+const on = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
 const show = (id) => {
   for (const s of document.querySelectorAll(".screen")) s.classList.remove("active");
   $(id).classList.add("active");
@@ -32,6 +34,7 @@ const S = {
   total: 0,
   mistakes: 0,
   hintsUsed: 0,
+  lives: LIVES_MAX,
   startedAt: 0,
   input: null,
   flash: new Map(),
@@ -141,13 +144,14 @@ function startLevel(n) {
   S.total = S.board.remaining;
   S.mistakes = 0;
   S.hintsUsed = 0;
+  S.lives = LIVES_MAX;
   S.flash.clear();
   S.flying = [];
   S.startedAt = performance.now();
   $("g-level").textContent = `Level ${n}`;
   $("g-diff").textContent = S.cfg.difficulty;
   $("rival").textContent = "";
-  renderDrops();
+  renderLives();
   show("game");
   ensureInput();
   requestAnimationFrame(() => {
@@ -156,13 +160,16 @@ function startLevel(n) {
   });
 }
 
-function renderDrops() {
+// The HUD icons are LIVES, not hints: a blocked (red) tap costs one, and at
+// zero it is game over. Hearts fill/empty with remaining lives.
+function renderLives() {
   const el = $("drops");
   el.innerHTML = "";
-  for (let i = 0; i < HINT_MAX; i++) {
+  for (let i = 0; i < LIVES_MAX; i++) {
     const d = document.createElement("span");
-    d.className = "drop" + (i < S.hintsUsed ? " used" : "");
-    d.textContent = "💧";
+    const alive = i < S.lives;
+    d.className = "life" + (alive ? "" : " lost");
+    d.textContent = alive ? "❤️" : "🤍";
     el.appendChild(d);
   }
   $("g-hint").disabled = S.hintsUsed >= HINT_MAX;
@@ -179,9 +186,17 @@ function onTap(x, y) {
     if (S.board.solved) setTimeout(onWin, FLY_MS);
   } else if (result === "blocked") {
     S.mistakes++;
+    S.lives--;
     audio.sfxBlocked();
     flashCell(x, y, currentTheme().exit);
+    renderLives();
+    if (S.lives <= 0) setTimeout(gameOver, FLASH_MS);
   }
+}
+
+function gameOver() {
+  $("go-level").textContent = S.mp ? "Race" : `Level ${S.level}`;
+  show("gameover");
 }
 
 function useHint() {
@@ -189,7 +204,7 @@ function useHint() {
   const cell = S.board.firstClearArrow();
   if (!cell) return;
   S.hintsUsed++;
-  renderDrops();
+  renderLives();
   const dir = S.board.arrowAt(cell[0], cell[1]);
   S.board.tap(cell[0], cell[1]);
   audio.sfxLeave();
@@ -323,12 +338,13 @@ function startMpRace(seed) {
   S.total = S.board.remaining;
   S.mistakes = 0;
   S.hintsUsed = 0;
+  S.lives = LIVES_MAX;
   S.flash.clear();
   S.flying = [];
   S.startedAt = performance.now();
   $("g-level").textContent = "Race";
   $("g-diff").textContent = "Multiplayer";
-  renderDrops();
+  renderLives();
   renderRival();
   show("game");
   ensureInput();
@@ -397,6 +413,9 @@ function init() {
   $("g-settings").addEventListener("click", cycleAndRedraw);
   $("g-hint").addEventListener("click", useHint);
   $("btn-next").addEventListener("click", () => startLevel(S.level + 1));
+  // guarded: tolerate a stale/partial DOM so init never dies on one missing node
+  on("btn-retry", "click", () => (S.mp ? leaveMp() : startLevel(S.level)));
+  on("btn-go-levels", "click", () => (S.mp ? leaveMp() : (show("levels"), renderLevels())));
 
   $("btn-create").addEventListener("click", mpCreate);
   $("btn-join").addEventListener("click", () => {
