@@ -1,11 +1,12 @@
 # xmaze
 
-A directed-arrow maze puzzle. The board is a grid of **one-way arrow corridors**.
-Starting at the green dot, you **drag one continuous line** to the red exit — you
-may only travel a corridor the way its arrow points. Opposing arrows form a wall.
-Levels ramp in difficulty, you keep a **daily streak**, earn **stars** (3 =
-Flawless) and a score, and spend **hint drops** when stuck. **Multiplayer** is an
-extra mode: two players join a room by invite code and race the same board.
+A "free the arrows" puzzle. The board is packed with arrows, each pointing
+N/E/S/W. **Tap an arrow** and it flies off the board in its direction — but only
+if every cell in its straight path to the edge is empty. Blocked by another arrow,
+it flashes red and stays. **Clear every arrow to win.** Levels ramp in difficulty,
+you keep a **daily streak**, earn **stars** (3 = Flawless) and a score, and spend
+**hint drops** when stuck. **Multiplayer** is an extra mode: two players join a
+room by invite code and race to clear the same board.
 
 The shipped game is the **web app** in `web/` (HTML5 canvas, no build step).
 Multiplayer runs over **Supabase Realtime** and scores are stored in **Supabase
@@ -14,11 +15,11 @@ prototype, kept for reference and tests; the web app is the canonical game.
 
 ## Gameplay
 
-- **Trace** by dragging from the green start; the line follows only arrows that
-  point your way. Drag back to undo. Reach the red exit to win.
-- **Zoom**: broad full board on tablet/desktop; pinch to zoom + two-finger pan on
-  mobile (wheel zoom on desktop).
-- **Hints**: tap the 💡 to reveal the next correct step; each costs a 💧 drop.
+- **Tap** an arrow to send it off the board when its path is clear; a blocked tap
+  flashes red. Clearing arrows opens paths for the rest.
+- **Zoom**: broad full board on tablet/desktop; pinch to zoom + pan on mobile
+  (wheel zoom, drag to pan on desktop).
+- **Hints**: tap 💡 to auto-clear one currently-free arrow; each costs a 💧 drop.
 - **Streak / levels / score / themes** persist in `localStorage`; the 🎨 icon
   cycles themes.
 
@@ -28,10 +29,9 @@ prototype, kept for reference and tests; the web app is the canonical game.
 web/            browser game (deploy this to Vercel)
   index.html, styles.css
   src/
-    grid.js        directed-arrow grid model, seeded gen, BFS solver (hints)
-    trace.js       trace play state (extend/undo/win, hints, mistakes)
-    render.js      canvas drawing (arrows, red trace) with pan/zoom transform
-    input.js       pointer controller: drag-trace, pinch/wheel zoom, pan
+    puzzle.js      board model: arrows, reverse-placement gen, isClear/tap, hints
+    render.js      canvas drawing (arrows + empty dots, flashes) + pan/zoom
+    input.js       pointer controller: tap-to-clear, pinch/wheel zoom, drag-pan
     streak.js      daily streak (localStorage)
     levels.js      level defs (seed/size/difficulty) + progress
     score.js       stars / score / Flawless
