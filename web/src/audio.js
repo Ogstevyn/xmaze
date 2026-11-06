@@ -1,0 +1,56 @@
+// Background music via the Web Audio API — a calm looping pentatonic phrase,
+// synthesised live, no asset file. Must be started from a user gesture
+// (browsers block autoplay), so call start() on the first click/tap.
+
+const MELODY_HZ = [261.63, 329.63, 392.0, 440.0, 392.0, 329.63, 293.66, 261.63];
+const NOTE_SECS = 0.5;
+
+let ctx = null;
+let gain = null;
+let timer = null;
+let muted = false;
+
+export function start() {
+  if (ctx) return; // already running
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  ctx = new AudioCtx();
+  gain = ctx.createGain();
+  gain.gain.value = 0.18;
+  gain.connect(ctx.destination);
+  let i = 0;
+  const playNext = () => {
+    if (!muted) playNote(MELODY_HZ[i % MELODY_HZ.length]);
+    i++;
+  };
+  playNext();
+  timer = setInterval(playNext, NOTE_SECS * 1000);
+}
+
+function playNote(freq) {
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const pad = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = "sine";
+  pad.type = "sine";
+  osc.frequency.value = freq;
+  pad.frequency.value = freq / 2;
+  // soft attack/release so notes don't click
+  env.gain.setValueAtTime(0, now);
+  env.gain.linearRampToValueAtTime(1, now + 0.05);
+  env.gain.linearRampToValueAtTime(0, now + NOTE_SECS);
+  osc.connect(env);
+  pad.connect(env);
+  env.connect(gain);
+  osc.start(now);
+  pad.start(now);
+  osc.stop(now + NOTE_SECS);
+  pad.stop(now + NOTE_SECS);
+}
+
+export function toggleMute() {
+  muted = !muted;
+  if (gain) gain.gain.value = muted ? 0 : 0.18;
+  return muted;
+}

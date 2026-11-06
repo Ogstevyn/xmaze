@@ -1,0 +1,15 @@
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# generated audio asset (synthesised at runtime)
+assets/music.wav
+
+# node / vercel
+node_modules/
+.vercel/
+
+# env
+.env
+.env.local

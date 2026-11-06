@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>xmaze</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <!-- DAILY STREAK -->
+      <section id="streak" class="screen center active">
+        <div class="sun">☀️</div>
+        <div id="streak-count" class="streak-num">1</div>
+        <div class="streak-label">Daily Streak</div>
+        <div id="week-row" class="week-row"></div>
+        <p class="streak-msg">You are ready for a great week!</p>
+        <button id="btn-continue" class="btn primary wide">Continue</button>
+      </section>
+
+      <!-- LEVEL SELECT -->
+      <section id="levels" class="screen center">
+        <div class="top-icons">
+          <button id="lv-theme" class="icon-btn" title="Theme">🎨</button>
+          <button id="lv-settings" class="icon-btn" title="Settings">⚙️</button>
+        </div>
+        <h1 class="logo">xmaze</h1>
+        <p id="lv-difficulty" class="tagline">Normal</p>
+        <div id="level-dots" class="level-dots"></div>
+        <button id="btn-play" class="btn primary wide">Play Level <span id="lv-num">1</span></button>
+        <button id="btn-mp" class="btn ghost wide">Multiplayer</button>
+      </section>
+
+      <!-- GAME -->
+      <section id="game" class="screen game">
+        <header class="game-bar">
+          <button id="g-back" class="icon-btn">←</button>
+          <div class="game-title">
+            <div id="g-level" class="g-level">Level 1</div>
+            <div id="g-diff" class="g-diff">Normal</div>
+          </div>
+          <div class="game-bar-right">
+            <button id="g-theme" class="icon-btn">🎨</button>
+            <button id="g-settings" class="icon-btn">⚙️</button>
+          </div>
+        </header>
+        <div class="hint-row">
+          <div id="drops" class="drops"></div>
+          <div id="rival" class="rival"></div>
+          <button id="g-hint" class="icon-btn hint-btn" title="Hint">💡</button>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="board"></canvas>
+          <div id="zoom-hint" class="zoom-hint">Pinch to zoom</div>
+        </div>
+      </section>
+
+      <!-- WIN CARD -->
+      <section id="win" class="screen center">
+        <div id="stars" class="stars">⭐⭐⭐</div>
+        <div class="card">
+          <h2 id="win-title" class="card-title">Flawless!</h2>
+          <div class="card-row"><span>Difficulty</span><span id="w-diff">Normal</span></div>
+          <div class="card-row"><span>Time</span><span id="w-time">00:04</span></div>
+          <div class="card-row"><span>Score</span><span id="w-score">0</span></div>
+          <div class="card-row"><span>Today's Levels</span><span id="w-today">0</span></div>
+          <div class="card-foot">
+            <span id="w-pct">100%</span>
+            <span id="w-mist">✕ 0</span>
+            <span id="w-hints">💡 0</span>
+          </div>
+        </div>
+        <div id="win-dots" class="level-dots"></div>
+        <button id="btn-next" class="btn primary wide">Next Level</button>
+      </section>
+
+      <!-- MULTIPLAYER: JOIN -->
+      <section id="join" class="screen center">
+        <h1 class="logo small">Enter code</h1>
+        <input id="join-code" class="field code-field" maxlength="4" placeholder="----" />
+        <div class="btn-row">
+          <button id="btn-join-go" class="btn primary">Join</button>
+          <button id="btn-join-back" class="btn ghost">Back</button>
+        </div>
+      </section>
+
+      <!-- MULTIPLAYER: MENU -->
+      <section id="mpmenu" class="screen center">
+        <h1 class="logo">Multiplayer</h1>
+        <input id="name" class="field" maxlength="24" placeholder="your name" />
+        <div class="btn-row">
+          <button id="btn-create" class="btn primary">Create</button>
+          <button id="btn-join" class="btn">Join</button>
+        </div>
+        <button id="btn-mp-back" class="btn ghost wide">Back</button>
+        <div class="board-panel">
+          <h2>Leaderboard</h2>
+          <ol id="menu-board" class="board-list"></ol>
+        </div>
+      </section>
+
+      <!-- MULTIPLAYER: LOBBY -->
+      <section id="lobby" class="screen center">
+        <p class="label">Invite code</p>
+        <div id="lobby-code" class="code-big">----</div>
+        <ul id="roster" class="roster"></ul>
+        <button id="btn-ready" class="btn primary wide">I'm ready</button>
+        <p id="lobby-hint" class="hint"></p>
+        <button id="btn-lobby-back" class="btn ghost">Leave</button>
+      </section>
+
+      <!-- MULTIPLAYER: OVER -->
+      <section id="over" class="screen center">
+        <h1 id="over-title" class="logo">Game over</h1>
+        <p id="over-detail" class="tagline"></p>
+        <div class="board-panel">
+          <h2>Leaderboard</h2>
+          <ol id="over-board" class="board-list"></ol>
+        </div>
+        <button id="btn-again" class="btn primary wide">Back</button>
+      </section>
+    </main>
+
+    <button id="btn-mute" class="mute">♪ on</button>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

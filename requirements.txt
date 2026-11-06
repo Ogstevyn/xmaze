@@ -1,0 +1,8 @@
+# Python reference client/server (desktop). The shipped web game needs none of
+# these — it runs in the browser and uses Supabase. Kept for the original
+# pygame prototype under client/ and server/.
+pygame-ce>=2.5
+websockets>=12
+# dev/test
+pytest>=8
+pytest-asyncio>=0.23

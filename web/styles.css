@@ -1,0 +1,136 @@
+:root {
+  --bg: #f4ece0;
+  --panel: #fbf6ee;
+  --text: #5a4e40;
+  --dim: #968a7a;
+  --trace: #d2694e;
+  --start: #5aaa78;
+  --exit: #d25c48;
+  --line: #e4d8c6;
+  --accent: #c8803c;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  overflow: hidden;
+}
+
+.app { height: 100vh; width: 100%; display: flex; justify-content: center; }
+
+.screen { display: none; width: 100%; max-width: 560px; height: 100%; padding: 24px 20px; }
+.screen.active { display: flex; }
+.screen.center { flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+
+/* tablets / desktop: let the game board use the full broad width */
+@media (min-width: 768px) {
+  .screen { max-width: 980px; }
+  .screen.game { max-width: 100%; }
+}
+
+.logo { font-size: 44px; margin: 0; letter-spacing: 1px; }
+.logo.small { font-size: 30px; }
+.logo.win { color: var(--start); }
+.logo.lose { color: var(--exit); }
+.tagline { color: var(--dim); margin: 0; }
+
+/* --- streak --- */
+.sun { font-size: 84px; line-height: 1; }
+.streak-num { font-size: 56px; font-weight: bold; color: var(--accent); }
+.streak-label { font-size: 22px; color: var(--accent); font-weight: bold; }
+.week-row { display: flex; gap: 8px; margin: 10px 0; }
+.week-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
+.week-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.week-dot.played { background: var(--accent); color: #fff; }
+.week-dot.today { box-shadow: 0 0 0 2px var(--accent); }
+.streak-msg { color: var(--accent); margin: 4px 0; }
+
+/* --- buttons --- */
+.btn {
+  padding: 14px 20px; font-size: 17px; font-family: inherit;
+  border: 2px solid var(--text); border-radius: 14px;
+  background: var(--panel); color: var(--text); cursor: pointer;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.ghost { border-color: var(--line); color: var(--dim); background: transparent; }
+.btn.wide { width: 100%; max-width: 320px; }
+.btn-row { display: flex; gap: 12px; }
+
+.field {
+  width: 100%; max-width: 320px; padding: 14px 16px; font-size: 18px; font-family: inherit;
+  border: 2px solid var(--line); border-radius: 12px; background: var(--panel);
+  color: var(--text); text-align: center;
+}
+.field:focus { outline: none; border-color: var(--accent); }
+.code-field { font-family: "Courier New", monospace; font-size: 40px; letter-spacing: 12px; text-transform: uppercase; }
+
+.level-dots { display: flex; gap: 10px; }
+.level-dots .dot {
+  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--panel); border: 2px solid var(--line); color: var(--dim); font-size: 15px;
+}
+.level-dots .dot.cur { background: var(--accent); color: #fff; border-color: var(--accent); }
+.level-dots .dot.done { border-color: var(--start); color: var(--start); }
+
+.top-icons { position: absolute; top: 18px; right: 18px; display: flex; gap: 10px; }
+
+/* --- game screen --- */
+.screen.game { flex-direction: column; padding: 0; gap: 0; }
+.game-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+}
+.game-title { text-align: center; }
+.g-level { color: var(--accent); font-weight: bold; }
+.g-diff { color: var(--text); font-size: 13px; }
+.game-bar-right { display: flex; gap: 8px; }
+.icon-btn {
+  background: transparent; border: none; font-size: 20px; cursor: pointer;
+  color: var(--text); padding: 6px; border-radius: 8px;
+}
+.hint-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
+.drops { display: flex; gap: 6px; font-size: 20px; }
+.drop { filter: grayscale(0); opacity: 1; }
+.drop.used { filter: grayscale(1); opacity: 0.4; }
+.rival { color: var(--dim); font-size: 13px; flex: 1; text-align: center; }
+.hint-btn { font-size: 22px; }
+
+.canvas-wrap { position: relative; flex: 1; min-height: 0; }
+#board { display: block; width: 100%; height: 100%; touch-action: none; }
+.zoom-hint {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  background: var(--panel); color: var(--dim); padding: 6px 14px; border-radius: 20px;
+  font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+@media (min-width: 768px) { .zoom-hint { display: none; } }
+
+/* --- win card --- */
+.stars { font-size: 40px; }
+.card { width: 100%; max-width: 360px; background: var(--panel); border-radius: 16px; padding: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
+.card-title { margin: 0 0 14px; text-align: center; color: var(--accent); }
+.card-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.card-row span:first-child { color: var(--dim); }
+.card-foot { display: flex; justify-content: space-between; margin-top: 12px; color: var(--text); font-size: 15px; }
+
+/* --- multiplayer bits --- */
+.label { color: var(--dim); text-transform: uppercase; letter-spacing: 2px; font-size: 13px; margin: 0; }
+.code-big { font-family: "Courier New", monospace; font-size: 56px; font-weight: bold; color: var(--exit); letter-spacing: 10px; }
+.roster { list-style: none; padding: 0; margin: 0; width: 100%; max-width: 320px; }
+.roster li { padding: 10px 14px; background: var(--panel); border-radius: 10px; margin-bottom: 8px; }
+.hint { color: var(--dim); font-size: 14px; min-height: 20px; }
+.board-panel { width: 100%; max-width: 360px; background: var(--panel); border-radius: 14px; padding: 16px 20px; }
+.board-panel h2 { margin: 0 0 10px; font-size: 18px; }
+.board-list { margin: 0; padding: 0; list-style: none; }
+.board-list li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.board-list li:last-child { border-bottom: none; }
+
+.mute {
+  position: fixed; bottom: 12px; right: 12px; padding: 8px 12px; font-family: inherit; font-size: 14px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--dim); cursor: pointer; z-index: 10;
+}
