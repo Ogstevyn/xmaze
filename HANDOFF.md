@@ -18,7 +18,9 @@ recording `/c/Users/USER/Downloads/6010582116847329017.mp4`):
   flaw in §6).
 
 Around that core: Daily Streak, levels + difficulty, stars/score ("Flawless" =
-3 stars), hint drops, themes, pinch/zoom, and an invite-code multiplayer race.
+3 stars), **3 lives** (hearts) lost on blocked/red taps — 0 lives = Game Over
+(`#gameover` screen, Retry/Levels), a separate hint button, themes, pinch/zoom,
+and an invite-code multiplayer race.
 
 > History: the mechanic was misread three times before the screen recording
 > clarified it (cascade → snake-tap → drag-a-line → **correct: tap-to-free**).
@@ -100,7 +102,9 @@ browser. Adding one is a recommended early task (see §6).
   screen fade transitions.
 - Full screen flow: streak → levels → game → win → next level; progress, streak,
   Today's Levels persist in localStorage.
-- Themes (5), hint drops (reveal/clear one free arrow), pinch/wheel zoom + pan,
+- Lives: 3 hearts, a blocked (red) tap costs one; at 0 → Game Over screen.
+  The 💡 hint (reveal/clear one free arrow) is separate, capped at 3.
+- Themes (5), pinch/wheel zoom + pan,
   responsive broad-on-desktop / zoomed-on-mobile.
 - Multiplayer: invite-code rooms over Supabase Realtime, seed-synced boards,
   win/lose propagation, Postgres leaderboard. **Verified live with a real 2-tab
